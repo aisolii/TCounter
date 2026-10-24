@@ -21,16 +21,19 @@
 
 ## Установка (один раз)
 
+Скачай проект: на GitHub кнопка **Code → Download ZIP** (и распакуй) или
+`git clone https://github.com/aisolii/TCounter`.
+
 Нужен Python 3.10 или новее. Проверить: `python --version` (на macOS/Linux — `python3 --version`).
 
-**Windows** (в папке `traffic_counter`):
+**Windows** (в папке проекта):
 ```
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**macOS / Linux**:
+**macOS / Linux** (в папке проекта):
 ```
 python3 -m venv .venv
 source .venv/bin/activate
