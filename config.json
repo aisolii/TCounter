@@ -1,0 +1,45 @@
+{
+  "video": "videos/highway_test.mp4",
+  "line": [
+    [
+      250,
+      780
+    ],
+    [
+      2450,
+      780
+    ]
+  ],
+  "direction_names": [
+    "направление 1",
+    "направление 2"
+  ],
+  "model": "models/yolo11n.pt",
+  "confidence": 0.3,
+  "frame_step": 2,
+  "imgsz": 960,
+  "device": "auto",
+  "start_sec": 0,
+  "end_sec": 12,
+  "results_dir": "results",
+  "annotated_max_width": 1280,
+  "co2": {
+    "segment_length_km": 3.2,
+    "fuel_l_per_km": {
+      "car": 0.135,
+      "truck": 0.34,
+      "bus": 0.475,
+      "motorcycle": 0.05
+    },
+    "fuel_type": {
+      "car": "бензин",
+      "truck": "бензин",
+      "bus": "дизель",
+      "motorcycle": "бензин"
+    },
+    "co2_kg_per_l": {
+      "бензин": 2.31,
+      "дизель": 2.68
+    }
+  }
+}
