@@ -6,20 +6,16 @@
 import argparse
 import csv
 import json
-import shutil
-import subprocess
 import time
 from collections import Counter
-from pathlib import Path
 
 import cv2
-import matplotlib
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from ultralytics import YOLO
 
-from common import (CLASS_ORDER, CLASS_RU, PERSON_CLASS, VEHICLE_CLASSES,
-                    load_config, resolve, results_folder)
+from common import (CLASS_ORDER, CLASS_RU, PERSON_CLASS, VEHICLE_CLASSES, font,
+                    load_config, resolve, results_folder, to_h264)
 
 # Цвет рамки для каждого класса (B, G, R)
 COLORS = {"car": (60, 180, 75), "motorcycle": (255, 140, 0),
@@ -28,9 +24,6 @@ COLORS = {"car": (60, 180, 75), "motorcycle": (255, 140, 0),
 # Короткие подписи над рамками
 SHORT_NAME = {"car": "легковая", "motorcycle": "мото", "bus": "автобус",
               "truck": "грузовик", "person": "человек"}
-
-# Шрифт с кириллицей: берём тот, что идёт вместе с matplotlib (есть на любом компьютере)
-FONT_PATH = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSans-Bold.ttf"
 
 
 # ---------- Геометрия линии ----------
@@ -62,13 +55,6 @@ def pick_device(name):
 
 
 # ---------- Рисование ----------
-
-def font(size):
-    try:
-        return ImageFont.truetype(str(FONT_PATH), size)
-    except OSError:
-        return ImageFont.load_default()
-
 
 def draw_overlay(frame, dets, line, scale, counts=None, dir_names=None, short=False):
     """Рисует рамки, подписи, линию и (если нужно) табличку со счётчиком.
@@ -145,19 +131,6 @@ def make_stand_frame(frame, dets, line):
     # Рамки рисуем только для уверенно найденных объектов, чтобы кадр был чистым
     clear = [d for d in dets if d["conf"] >= 0.4]
     return draw_overlay(img, clear, line, 1.0, short=True)
-
-
-def to_h264(src, dst):
-    """Перекодируем видео в H.264, чтобы оно открывалось в браузере и на телефоне.
-    Если ffmpeg не установлен — оставляем как есть (откроется в VLC)."""
-    if shutil.which("ffmpeg"):
-        r = subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src), "-c:v", "libx264",
-                            "-pix_fmt", "yuv420p", "-crf", "26", "-movflags", "+faststart",
-                            str(dst)])
-        if r.returncode == 0:
-            src.unlink()
-            return
-    src.replace(dst)
 
 
 # ---------- Главная часть ----------

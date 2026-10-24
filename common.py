@@ -1,6 +1,11 @@
 """Общие функции для всех скриптов: чтение настроек и путей."""
 import json
+import shutil
+import subprocess
 from pathlib import Path
+
+import matplotlib
+from PIL import ImageFont
 
 # Классы COCO, которые мы считаем: номер класса -> английское имя
 VEHICLE_CLASSES = {2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
@@ -40,3 +45,28 @@ def results_folder(cfg):
     folder = resolve(cfg, cfg.get("results_dir", "results")) / name
     folder.mkdir(parents=True, exist_ok=True)
     return folder
+
+
+# Шрифт с кириллицей: берём тот, что идёт вместе с matplotlib (есть на любом компьютере)
+FONT_PATH = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSans-Bold.ttf"
+
+
+def font(size):
+    """Шрифт для подписей на кадрах (поддерживает русские буквы)."""
+    try:
+        return ImageFont.truetype(str(FONT_PATH), size)
+    except OSError:
+        return ImageFont.load_default()
+
+
+def to_h264(src, dst):
+    """Перекодируем видео в H.264, чтобы оно открывалось в браузере и на телефоне.
+    Если ffmpeg не установлен — оставляем как есть (откроется в VLC)."""
+    if shutil.which("ffmpeg"):
+        r = subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src), "-c:v", "libx264",
+                            "-pix_fmt", "yuv420p", "-crf", "26", "-movflags", "+faststart",
+                            str(dst)])
+        if r.returncode == 0:
+            src.unlink()
+            return
+    src.replace(dst)
